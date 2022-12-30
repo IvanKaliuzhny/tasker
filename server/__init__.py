@@ -14,15 +14,9 @@ from flask_jwt_extended import (
 def register_extensions(app):
     db.init_app(app)
 
-
 def register_blueprints(app):
-    for module_name in {''}:
-        module = import_module('routes'.format(module_name))
-        app.register_blueprint(module.blueprint)
-    for module_name in {'auth'}:
-        module = import_module('modules.{}.routes'.format(module_name))
-        app.register_blueprint(module.blueprint)
-
+    from server.routes import blueprint
+    app.register_blueprint(blueprint)
 
 def configure_database(app):
     db.init_app(app)
@@ -32,9 +26,9 @@ def configure_database(app):
         with app.app_context():
             db.create_all()
 
-    @app.teardown_request
-    def shutdown_session(exception=None):
-        db.session.remove()
+    # @app.teardown_request
+    # def shutdown_session(exception=None):
+    #     db.session.remove()
 
 
 def create_app(config):
@@ -43,15 +37,9 @@ def create_app(config):
     app.config.from_object(config)
 
     configure_database(app)
-    CORS(app)
-
-    app.config.from_object('config.Config')
-    #app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
     jwt = JWTManager(app)
 
     register_blueprints(app)
-    configure_database(app)
-    #Migrate(app, db)
 
     return app

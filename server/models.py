@@ -1,23 +1,24 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import UUID
 from uuid import uuid4
 from datetime import datetime
 from db import db
 
 user_task = db.Table(
     'user_task',
-    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id'), primary_key=True),
-    db.Column('task_id', db.Integer, db.ForeignKey('tasks.task_id', ondelete="CASCADE"), primary_key=True),
+    db.Column('user_id', UUID(as_uuid=True), db.ForeignKey('users.user_id'), primary_key=True),
+    db.Column('task_id', UUID(as_uuid=True), db.ForeignKey('tasks.task_id', ondelete="CASCADE"), primary_key=True),
 )
 
 
 class User(db.Model):
     __tablename__ = 'users'
 
-    user_id = db.Column(db.Integer, primary_key=True, default=uuid4())
+    user_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4())
     username = db.Column(db.String(50), unique=True, nullable=False, index=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(1000), nullable=False)
-    tasks = db.relationship('tasks', secondary=user_task)
+    password = db.Column(db.String(1000), nullable=False)
+    tasks = db.relationship('Task', secondary=user_task)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
 
     @property
@@ -32,7 +33,7 @@ class User(db.Model):
 class Task(db.Model):
     __tablename__ = 'tasks'
 
-    task_id = db.Column(db.Integer, primary_key=True, default=uuid4())
+    task_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid4())
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(500), nullable=False)
     status = db.Column(db.Integer, nullable=False)
